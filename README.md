@@ -16,7 +16,15 @@ A fun endless high-score game built using Rust and `ggez`.
 3. Use `make test` to run the unit tests.
 4. Use `make clean` to remove all target files.
 
-Enjoy playing the Flappy Ball game and beat your high score!
+## Positive Test Cases
+1. Ball Movement
+2. Pipe Generation
+3. Score track
+
+## Negative Test Cases
+1. No score increment without passing pipe
+2. Ball collision with pipe
+3. Ball out of bound
 
 ## Author
 Sandeep Chikkapla Siddappa

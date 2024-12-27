@@ -60,7 +60,7 @@ struct GameReq {
 impl GameReq {
     // Initializes the game
     fn game_start() -> Self {
-        println!("Game initialized!");
+//        println!("Game initialized!");
         GameReq {
             ball: Ball {
                 x_axis: SCREEN_WIDTH / 4.0,
@@ -76,14 +76,14 @@ impl GameReq {
 
     // Refresh the game state
     fn refresh_game(&mut self) {
-        println!("Game reset!");
+//        println!("Game reset!");
         self.ball.y_axis = SCREEN_HEIGHT / 2.0;
         self.ball.velocity = 0.0;
         self.pipes.clear();
         self.high_score = self.high_score.max(self.score);
         self.score = 0;
         self.state = GameReqType::Start;
-        println!("High score: {}", self.high_score);
+//        println!("High score: {}", self.high_score);
     }
 
     // Add or remove pipes accordingly
@@ -114,7 +114,7 @@ impl GameReq {
             };
             
             self.pipes.push(new_pipe);
-            println!("Added new pipe! Height: {}", height);
+//            println!("Added new pipe! Height: {}", height);
         }
     
        
@@ -126,7 +126,7 @@ impl GameReq {
             if passed_pipe && not_scored_yet {
                 pipe.scored = true;         
                 self.score += 1;            // Add a point
-                println!("Score is now: {}", self.score);
+ //               println!("Score is now: {}", self.score);
             }
         }
     }
@@ -134,7 +134,7 @@ impl GameReq {
     // Checks for ball if crashed with pipes or screen boundaries
     fn is_crashed(&mut self) {
         if self.ball.y_axis > SCREEN_HEIGHT || self.ball.y_axis < 0.0 {
-            println!("Ball is out of bounds! Game over.");
+//            println!("Ball is out of bounds! Game over.");
             self.state = GameReqType::GameOver;
         }
 
@@ -145,7 +145,7 @@ impl GameReq {
                 || self.ball.y_axis + 10.0 > pipe.height + PIPE_GAP;
 
             if horizontal_overlap && vertical_overlap {
-                println!("Collision detected! Pipe at x: {}", pipe.x_axis);
+ //               println!("Collision detected! Pipe at x: {}", pipe.x_axis);
                 self.state = GameReqType::GameOver;
                 return; 
             }
@@ -162,7 +162,7 @@ impl EventHandler for GameReq {
 
         self.ball.velocity += GRAVITY;
         self.ball.y_axis += self.ball.velocity;
-        println!("Ball position updated: y = {}, velocity = {}", self.ball.y_axis, self.ball.velocity);
+ //       println!("Ball position updated: y = {}, velocity = {}", self.ball.y_axis, self.ball.velocity);
 
         self.add_or_remove_pipes();
         self.is_crashed();
@@ -241,30 +241,31 @@ impl EventHandler for GameReq {
             KeyCode::Space => {
                 if self.state == GameReqType::Start {
                     self.state = GameReqType::Playing;
-                    println!("Game started!");
+               //     println!("Game started!");
                 } else if self.state == GameReqType::Playing {
                     self.ball.velocity = ANTI_GRAVITY;
-                    println!("Ball jumped! New velocity: {}", self.ball.velocity);
+               //     println!("Ball jumped! New velocity: {}", self.ball.velocity);
                 }
             }
             KeyCode::P => {
                 if self.state == GameReqType::Playing {
                     self.state = GameReqType::Paused;
-                    println!("Game paused.");
+//                    println!("Game paused.");
                 } else if self.state == GameReqType::Paused {
                     self.state = GameReqType::Playing;
-                    println!("Game resumed.");
+//                   println!("Game resumed.");
                 }
             }
             KeyCode::R => {
                 self.refresh_game();
-                println!("Game reset.");
+//                println!("Game reset.");
             }
             _ => {}
         }
     }
 }
 
+//Negative test cases.
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -315,6 +316,55 @@ fn collision_with_pipe_test() {
         assert_eq!(game.score, 0, "Score should not increment when the ball hasn't passed a pipe.");
     }
 
+
+//Positive test cases.
+    #[test]
+    fn ball_movement_test() {
+    
+        let mut game = GameReq::game_start();
+        game.state = GameReqType::Playing;
+        
+        let initial_y = game.ball.y_axis;
+        
+        game.ball.velocity = ANTI_GRAVITY;
+        
+        game.ball.y_axis += game.ball.velocity;
+        
+        assert!(game.ball.y_axis < initial_y, "Ball should move upward when jumping");
+    }
+
+    #[test]
+    fn pipe_generation_test() {
+    
+        let mut game = GameReq::game_start();
+        game.state = GameReqType::Playing;
+        
+        assert_eq!(game.pipes.len(), 0, "Should start with no pipes");
+        
+        game.add_or_remove_pipes();
+        
+        assert_eq!(game.pipes.len(), 1, "Should generate one pipe");
+        
+        let pipe = &game.pipes[0];
+        assert_eq!(pipe.x_axis, SCREEN_WIDTH, "New pipe should start at screen width");
+    }
+
+    #[test]
+    fn score_tracking_test() {
+        let mut game = GameReq::game_start();
+        game.state = GameReqType::Playing;
+        
+        game.pipes.push(Pipe {
+            x_axis: game.ball.x_axis - PIPE_WIDTH - 10.0, 
+            height: 200.0,
+            scored: false,
+        });
+    
+        game.add_or_remove_pipes();
+        
+        assert_eq!(game.score, 1, "Should score point after passing pipe");
+        assert!(game.pipes[0].scored, "Pipe should be marked as scored");
+    }
 
 }
 
