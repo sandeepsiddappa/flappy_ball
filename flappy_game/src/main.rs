@@ -279,6 +279,43 @@ mod tests {
         assert_eq!(game.state, GameReqType::GameOver, "Game should end when ball goes out of bounds.");
     }
     
+
+    #[test]
+fn collision_with_pipe_test() {
+    let mut game = GameReq::game_start();
+    
+    game.state = GameReqType::Playing;
+
+    game.ball.x_axis = 200.0;  
+    game.ball.y_axis = 100.0;  
+    
+    game.pipes.push(Pipe {
+        x_axis: 195.0,         
+        height: 120.0,         
+        scored: false,
+    });
+    
+    // Check collision
+    game.is_crashed();
+    
+    assert_eq!(game.state,GameReqType::GameOver,"Game should end when ball collides with pipe at position ({}, {})",game.ball.x_axis,game.ball.y_axis);
+}
+    
+
+    #[test]
+    fn no_score_increment_without_pipe_pass_test() {
+
+        let mut game = GameReq::game_start();
+        game.pipes.push(Pipe {
+            x_axis: game.ball.x_axis + 100.0, 
+            height: SCREEN_HEIGHT / 2.0,
+            scored: false,
+        });
+        game.add_or_remove_pipes();
+        assert_eq!(game.score, 0, "Score should not increment when the ball hasn't passed a pipe.");
+    }
+
+
 }
 
 pub fn main() -> GameResult {
