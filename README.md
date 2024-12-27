@@ -2,13 +2,13 @@
 
 A fun endless high-score game built using Rust and `ggez`.
 
+## Gameplay Design
+![Flappy Ball Demo](assets/design.jpeg)
+
 ## Controls
 - **SPACE**: Jump
 - **P**: Pause/Resume game
 - **R**: Restart game
-
-## Gameplay Design
-![Flappy Ball Demo](assets/design.jpeg)
 
 ## How to Run
 1. Clone the repository.
