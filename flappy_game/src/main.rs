@@ -26,7 +26,7 @@ const PIPE_WIDTH: f32 = 50.0;
 const PIPE_GAP: f32 = 150.0;
 const PIPE_SPEED: f32 = 2.0;
 
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 enum GameReqType {
     Start,
     Playing,
@@ -139,12 +139,15 @@ impl GameReq {
         }
 
         for pipe in &self.pipes {
-            if self.ball.x_axis + 10.0 > pipe.x_axis
-                && self.ball.x_axis - 10.0 < pipe.x_axis + PIPE_WIDTH
-                && (self.ball.y_axis - 10.0 < pipe.height || self.ball.y_axis + 10.0 > pipe.height + PIPE_GAP)
-            {
-                println!("Collision with pipe at x: {}!", pipe.x_axis);
+            let horizontal_overlap = self.ball.x_axis + 10.0 > pipe.x_axis
+                && self.ball.x_axis - 10.0 < pipe.x_axis + PIPE_WIDTH;
+            let vertical_overlap = self.ball.y_axis - 10.0 < pipe.height
+                || self.ball.y_axis + 10.0 > pipe.height + PIPE_GAP;
+
+            if horizontal_overlap && vertical_overlap {
+                println!("Collision detected! Pipe at x: {}", pipe.x_axis);
                 self.state = GameReqType::GameOver;
+                return; 
             }
         }
     }
@@ -262,6 +265,22 @@ impl EventHandler for GameReq {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn is_ball_out_of_bounds_test() {
+        let mut game = GameReq::game_start();
+        game.ball.y_axis = SCREEN_HEIGHT + 10.0; 
+
+        game.is_crashed();
+
+        assert_eq!(game.state, GameReqType::GameOver, "Game should end when ball goes out of bounds.");
+    }
+    
+}
+
 pub fn main() -> GameResult {
     let contxt_bldr = ggez::ContextBuilder::new("flappy_ball", "Sandeep Chikkapla Siddappa")
         .window_setup(ggez::conf::WindowSetup::default().title("Flappy Ball"))
@@ -270,3 +289,4 @@ pub fn main() -> GameResult {
     let state = GameReq::game_start();
     event::run(ctx, event_loop, state)
 }
+
